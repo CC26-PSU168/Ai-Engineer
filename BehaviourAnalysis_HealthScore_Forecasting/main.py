@@ -31,8 +31,17 @@ load_dotenv()
 from analytics_engine import generate_monthly_summary
 from rule_based_ai import RuleEngine
 from forecast import ExpenseForecaster
-from lstm_model import load_model_and_preparer, predict_future
 from gemininarator import get_narrator
+
+# TensorFlow / LSTM is optional — not available on free-tier deployments
+try:
+    from lstm_model import load_model_and_preparer, predict_future
+    LSTM_AVAILABLE = True
+except (ImportError, ModuleNotFoundError):
+    LSTM_AVAILABLE = False
+    load_model_and_preparer = None  # type: ignore
+    predict_future = None           # type: ignore
+    print("⚠️  TensorFlow not found — LSTM features disabled, using Prophet fallback.")
 
 # ══════════════════════════════════════════════════════════════════
 # SETUP APP
@@ -62,11 +71,12 @@ _lstm_model    = None
 _lstm_preparer = None
 LSTM_SAVE_DIR  = "models/saved"
 
-try:
-    _lstm_model, _lstm_preparer = load_model_and_preparer(LSTM_SAVE_DIR)
-    print("LSTM model loaded.")
-except Exception:
-    print("LSTM model belum ada. Training via POST /train/lstm.")
+if LSTM_AVAILABLE and load_model_and_preparer:
+    try:
+        _lstm_model, _lstm_preparer = load_model_and_preparer(LSTM_SAVE_DIR)
+        print("LSTM model loaded.")
+    except Exception:
+        print("LSTM model belum ada. Training via POST /train/lstm.")
 
 
 # ══════════════════════════════════════════════════════════════════
