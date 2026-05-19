@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pandas
+numpy
+sqlalchemy
+psycopg2
+google-generativeai
+prophet
+tensorflow
+scikit-learn
+pydantic
